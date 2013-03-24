@@ -1,0 +1,8 @@
+[Desktop Entry]
+_Name=Mydownloader
+_Comment=Mydownloader application
+Categories=GNOME;Utility;
+Exec=mydownloader
+Icon=mydownloader
+Terminal=false
+Type=Application

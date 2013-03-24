@@ -1,0 +1,9 @@
+<glade-catalog name="preferences_mydownloader_dialog" domain="glade-3" 
+               depends="gtk+" version="1.0">
+  <glade-widget-classes>
+    <glade-widget-class title="Mydownloader Preferences Dialog" name="PreferencesMydownloaderDialog" 
+                        generic-name="PreferenceMydownloaderDialog" parent="GtkDialog"
+                        icon-name="widget-gtk-dialog"/>
+  </glade-widget-classes>
+
+</glade-catalog>
