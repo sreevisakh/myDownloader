@@ -29,7 +29,8 @@ def main():
     'constructor for your class instances'
     parse_options()
 
-    # Run the application.    
+    # Run the application.
+
     window = MydownloaderWindow.MydownloaderWindow()
+    Gtk.main()    
     window.show()
-    Gtk.main()

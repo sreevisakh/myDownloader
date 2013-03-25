@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <!-- interface-requires addnewdownload_dialog 1.0 -->
   <!-- interface-requires gtk+ 3.0 -->
+  <!-- interface-requires addnewdownload_dialog 1.0 -->
   <object class="AddnewdownloadDialog" id="addnewdownload_dialog">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -89,6 +89,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">●</property>
+                <property name="text" translatable="yes">http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi</property>
               </object>
               <packing>
                 <property name="expand">False</property>

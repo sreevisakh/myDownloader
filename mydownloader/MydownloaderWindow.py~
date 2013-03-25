@@ -29,15 +29,15 @@ class MydownloaderWindow(Window):
         self.AboutDialog = AboutMydownloaderDialog
         self.PreferencesDialog = PreferencesMydownloaderDialog
         self.set_position(0)
-
+        (self)
+        gobject.idle_add(utility.loadFromDb,self)
         # Code for other initialization actions should be added here.
-    def printme(st):
-        print st
+
     def on_mnu_new_activate(self,widget,data=None):
-        dir(logger)
         adder = AddnewdownloadDialog()
         result = adder.run()
         url = adder.get_url
         adder.destroy()
-        gobject.idle_add(utility.addUrl(selfurl,))
+        if result==Gtk.ResponseType.OK:
+            gobject.idle_add(utility.addUrl,self,url)
 

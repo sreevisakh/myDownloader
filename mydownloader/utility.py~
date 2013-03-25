@@ -2,6 +2,8 @@ import re
 import urllib2
 import os
 from gi.repository import Gtk
+import sqlite3 as db
+import traceback
 	#bad
 	#global url1 = "http://google.com"
 	#global url2 = "ht"
@@ -60,42 +62,111 @@ def getUrlDetails(url):
 		return e
 
 
-
+def status(window,msg):
+	window.ui.label2.set_text(msg)
 
 def addUrl(window,url):
 	"""Function used to add url to download list"""
-	try:
+	#try:
 	
-		#passing url
-		result = validateUrl(url)
-		if result == 0:
-			handleError(window,"Can't add malformed url",Gtk.MessageType.ERROR)
-		else:
-			result = getUrlDetails(url)
-			if type(result) ==dict:
-				
+	#check already exists
+	result = checkUrlExists(window,url)
+	if result==1:
+		handleError(window,"Duplicate Download",Gtk.MessageType.WARNING) # NEED UPDATE
+		return 0
+	status(window,'Validating')
+	result = validateUrl(url)
+	if result == 0:
+		handleError(window,"Can't add malformed url",Gtk.MessageType.ERROR)
+	else:
+		status(window,'Getting URL details')
+		result = getUrlDetails(url)
+		if type(result) ==dict:
+			status(window,'Adding to List')
+			if addToDb(window,result):
 				listObject = window.builder.get_object('liststore1') #dependant
 				listObject.append([1,result['filename'],result['url'],result['Content-Length'],"0%",""])
-				return 1
-			else:
-				handleError(window,result,Gtk.MessageType.WARNING)
-				return 0		
-	except Exception as e:
+			return 0
+		else:
+			handleError(window,result,Gtk.MessageType.WARNING)
+			return 0		
+	#except Exception as e:
+	#	handleError(window,e,Gtk.MessageType.ERROR)
+	#	return 0
+
+#######################################
+# DB RELATED CODES
+#######################################
+
+def addToDb(window,d):
+	"""Add download urls to database"""
+	con = None
+	try:
+		con = db.connect('dlList.db')
+		cursor = con.cursor()
+		sql = "INSERT INTO downloads (filename,fileurl,size,loc) values('"+d['filename']+"','"+d['url']+"','"+d['Content-Length']+"','')"
+		con.execute(sql)
+		con.commit()
+		return 1
+	except Exception as e:		
 		handleError(window,e,Gtk.MessageType.ERROR)
 		return 0
+		
+def loadFromDb(window):
+	"""Load download list from db"""
+	con = None
+	try:
+		con=db.connect('dlList.db')
+		cursor = con.cursor()
+		sql = "SELECT * FROM downloads"
+		cursor.execute(sql)
+		rows = cursor.fetchall()
+		listObject = window.builder.get_object('liststore1') #dependant
+		for result in rows:
+		#TODO:calculate percentage
+			listObject.append([result[0],result[1],result[2],result[3],"0%",result[4]])
+		return
+	except Exception as e:		
+		handleError(window,e,Gtk.MessageType.ERROR)
+
+def checkUrlExists(window,url):
+	"""Checks and return if url already in downloadlist"""
+	con = None
+	try:
+		con=db.connect('dlList.db')
+		cursor = con.cursor()
+		sql = "SELECT * FROM downloads WHERE fileurl='"+url+"'"
+		
+		cursor.execute(sql)
+		rows = cursor.fetchall()
+		if len(rows)>0:
+			return 1
+		else:
+			return 0
+	except Exception as e:		
+		handleError(window,e,Gtk.MessageType.ERROR)
+##############################################
+# Error Handling Codes
+##############################################
+
 
 def handleError(window,e,t):
 	"""Handles error Messages via messagebox"""
+	if type(e)==Exception:
+		traceback.print_last()
 	msg = Gtk.MessageDialog(parent=window, flags=0, type=t, buttons=Gtk.ButtonsType.OK, message_format=str(e))   
 	msg.run()
 	msg.destroy() 
+	
 
 #Tests
 import unittest
 
 def unit():
 	#testing validateurl
-	self.assertEqual(validateUrl(self,url),details)
+	d = {'filename':'TestFilename1','fileurl':'TestUrl1','Content-Length':'100 MB'}
+	addToDb(d)
+		
 
 
 
