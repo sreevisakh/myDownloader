@@ -6,11 +6,12 @@
 import gettext
 from gettext import gettext as _
 gettext.textdomain('mydownloader')
-
+import thread
 from gi.repository import Gtk # pylint: disable=E0611
 import logging
 logger = logging.getLogger('mydownloader')
 import utility
+import pdb
 from mydownloader_lib import Window
 from mydownloader.AboutMydownloaderDialog import AboutMydownloaderDialog
 from mydownloader.PreferencesMydownloaderDialog import PreferencesMydownloaderDialog
@@ -28,30 +29,13 @@ class MydownloaderWindow(Window):
         self.set_position(0)
 
         # Code for other initialization actions should be added here.
+
     def on_mnu_new_activate(self,widget,data=None):
         dir(logger)
         adder = AddnewdownloadDialog()
         result = adder.run()
         url = adder.get_url
         adder.destroy()
-        if not utility.validateUrl(url):
-            msg = Gtk.MessageDialog(parent=self, flags=0, type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK, message_format="Can't Process a malformed url")   
-            msg.run()
-            msg.destroy()
-        else:
-            #check dialogbox result
-            if result!=Gtk.ResponseType.OK:
-                return
 
-            details = utility.getUrlDetails(url)            
-            if details['error']:
-                msg = Gtk.MessageDialog(parent=self, flags=0, type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, message_format=details['error'])   
-                msg.run()
-                msg.destroy()
-            #add list of files to treeview
-            else:
-                urllist = self.builder.get_object('liststore1')
-                self.priority +=1
-                urllist.append([self.priority,details['filename'],details['url'],details['Content-Length'],"0%"])
 
-    
+
