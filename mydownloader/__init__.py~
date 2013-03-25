@@ -11,7 +11,7 @@ gettext.textdomain('mydownloader')
 
 from gi.repository import Gtk # pylint: disable=E0611
 
-from myl    downloader import MydownloaderWindow
+from mydownloader import MydownloaderWindow
 
 from mydownloader_lib import set_up_logging, get_version
 

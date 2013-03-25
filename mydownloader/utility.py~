@@ -71,7 +71,9 @@ def addUrl(window,url):
 		if result == 0:
 			handleError(window,"Can't add malformed url",Gtk.MessageType.ERROR)
 		else:
+			result = getUrlDetails(url)
 			if type(result) ==dict:
+				
 				listObject = window.builder.get_object('liststore1') #dependant
 				listObject.append([1,result['filename'],result['url'],result['Content-Length'],"0%",""])
 				return 1

@@ -12,6 +12,8 @@ import logging
 logger = logging.getLogger('mydownloader')
 import utility
 import pdb
+import thread
+import gobject
 from mydownloader_lib import Window
 from mydownloader.AboutMydownloaderDialog import AboutMydownloaderDialog
 from mydownloader.PreferencesMydownloaderDialog import PreferencesMydownloaderDialog
@@ -29,13 +31,13 @@ class MydownloaderWindow(Window):
         self.set_position(0)
 
         # Code for other initialization actions should be added here.
-
+    def printme(st):
+        print st
     def on_mnu_new_activate(self,widget,data=None):
         dir(logger)
         adder = AddnewdownloadDialog()
         result = adder.run()
         url = adder.get_url
         adder.destroy()
-
-
+        gobject.idle_add(utility.addUrl(selfurl,))
 

@@ -12,6 +12,8 @@ import logging
 logger = logging.getLogger('mydownloader')
 import utility
 import pdb
+import thread
+import gobject
 from mydownloader_lib import Window
 from mydownloader.AboutMydownloaderDialog import AboutMydownloaderDialog
 from mydownloader.PreferencesMydownloaderDialog import PreferencesMydownloaderDialog
@@ -37,8 +39,5 @@ class MydownloaderWindow(Window):
         result = adder.run()
         url = adder.get_url
         adder.destroy()
-        self.printme("hello1")
-        thread.start_new_thread(self.printme, ("hello", ))
-        pdb.pm()
-
+        gobject.idle_add(utility.addUrl(self,url,))
 
