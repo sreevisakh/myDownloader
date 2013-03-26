@@ -106,23 +106,6 @@ def findFileName(filename):
 		filename = name+ext
 	return filename
 
-def calcPer(file_id):
-	try:
-		con=db.connect('dlList.db')
-		cursor = con.cursor()
-		sql = "SELECT loc,size FROM downloads WHERE id="+file_id
-		cursor.execute(sql)
-		row = cursor.fetchone()
-		totalSize = row[1]
-		fileloc= row[0]
-		con.close()
-		dlSize = os.path.getsize(TEMP_DIR+fileloc)
-		per = dlSize/totalSize *100
-		return per
-	except Exception as e:
-		print e
-	
-
 #######################################
 # DB RELATED CODES
 #######################################
@@ -180,8 +163,7 @@ def updateLoc(a,b): #a=Id,b=filename
 		con=db.connect('dlList.db')
 		cursor = con.cursor()
 		sql = "UPDATE downloads SET loc='"+b+"' WHERE id="+str(a)
-		cursor.execute(sql)
-		con.commit()
+		return cursor.execute(sql)
 	except Exception as e:		
 		print e
 def emptyDb():
@@ -221,8 +203,8 @@ def unit():
 #emptyDb()
 
 
-#import mydownloader.utility as u
-#u.updateLoc(0,"hello.txt")
+import mydownloader.utility as u
+u.updateLoc(0,"hello.txt")
 
 
 

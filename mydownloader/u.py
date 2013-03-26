@@ -51,7 +51,7 @@ def getUrlDetails(url):
 		details['error']=""
 		details['url']=urlFile.geturl()
 		if 'Content-Length' in  details:
-			details['Content-Length'] = str((details['Content-Length']))
+			details['Content-Length'] = str(human_readable(details['Content-Length']))
 		else:
 			details['Content-Length'] ="Unavailable"
 		#checking filetype
@@ -87,7 +87,7 @@ def addUrl(window,url):
 			status(window,'Adding to List')
 			if addToDb(window,result):
 				listObject = window.builder.get_object('liststore1') #dependant
-				listObject.append([1,result['filename'],result['url'],str(human_readable(result['Content-Length'])),"0%",""])
+				listObject.append([1,result['filename'],result['url'],result['Content-Length'],"0%",""])
 			status(window,'Idle')
 			return 0
 		else:
@@ -105,23 +105,6 @@ def findFileName(filename):
 		name = name+"("+str(num)+")"
 		filename = name+ext
 	return filename
-
-def calcPer(file_id):
-	try:
-		con=db.connect('dlList.db')
-		cursor = con.cursor()
-		sql = "SELECT loc,size FROM downloads WHERE id="+file_id
-		cursor.execute(sql)
-		row = cursor.fetchone()
-		totalSize = row[1]
-		fileloc= row[0]
-		con.close()
-		dlSize = os.path.getsize(TEMP_DIR+fileloc)
-		per = dlSize/totalSize *100
-		return per
-	except Exception as e:
-		print e
-	
 
 #######################################
 # DB RELATED CODES
@@ -173,28 +156,6 @@ def checkUrlExists(window,url):
 			return 0
 	except Exception as e:		
 		handleError(window,e,Gtk.MessageType.ERROR)
-def updateLoc(a,b): #a=Id,b=filename
-	"""Update download location of file"""
-	con = None
-	try:
-		con=db.connect('dlList.db')
-		cursor = con.cursor()
-		sql = "UPDATE downloads SET loc='"+b+"' WHERE id="+str(a)
-		cursor.execute(sql)
-		con.commit()
-	except Exception as e:		
-		print e
-def emptyDb():
-	"""Deletes all values in Databse"""
-	con = None
-	try:
-		con=db.connect('dlList.db')
-		cursor = con.cursor()
-		sql = "DELETE FROM downloads"
-		cursor.execute(sql)
-	except Exception as e:		
-		handleError(window,e,Gtk.MessageType.ERROR)
-
 ##############################################
 # Error Handling Codes
 ##############################################
@@ -218,11 +179,9 @@ def unit():
 	addToDb(d)
 		
 
-#emptyDb()
 
 
-#import mydownloader.utility as u
-#u.updateLoc(0,"hello.txt")
+
 
 
 

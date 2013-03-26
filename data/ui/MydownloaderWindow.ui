@@ -24,6 +24,55 @@
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkMenu" id="mnu_popup">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="mun_start">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Start/Stop</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="mnu_remove">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="mnu_copyurl">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Copy Url</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="mnu_openloc">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Open Location</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="mnu_prop">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Properties</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+  </object>
   <object class="MydownloaderWindow" id="mydownloader_window">
     <property name="width_request">700</property>
     <property name="height_request">400</property>
@@ -303,9 +352,13 @@
             <property name="can_focus">True</property>
             <property name="vscroll_policy">natural</property>
             <property name="model">liststore1</property>
+            <property name="search_column">1</property>
             <property name="enable_grid_lines">both</property>
+            <signal name="button-press-event" handler="on_treeview1_button_press_event" swapped="no"/>
             <child internal-child="selection">
-              <object class="GtkTreeSelection" id="treeview-selection1"/>
+              <object class="GtkTreeSelection" id="treeview-selection1">
+                <signal name="changed" handler="on_treeview1_selection_changed" swapped="no"/>
+              </object>
             </child>
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn1">
