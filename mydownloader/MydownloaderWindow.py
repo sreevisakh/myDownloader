@@ -6,17 +6,17 @@
 import gettext
 import os
 import time
+import utility
+import gobject
+import threading
+import subprocess as sp
+
 from gettext import gettext as _
 gettext.textdomain('mydownloader')
-import thread
-from gi.repository import Gtk # pylint: disable=E0611
+from gi.repository import Gtk,Gdk,GObject,GLib # pylint: disable=E0611
+
 import logging
 logger = logging.getLogger('mydownloader')
-import utility
-import pdb
-import thread
-import gobject
-import subprocess as sp
 from mydownloader_lib import Window
 from mydownloader.AboutMydownloaderDialog import AboutMydownloaderDialog
 from mydownloader.PreferencesMydownloaderDialog import PreferencesMydownloaderDialog
@@ -27,6 +27,7 @@ class MydownloaderWindow(Window):
     priority = 0
     handles={}
     downloading=[]
+    
     def finish_initializing(self, builder): # pylint: disable=E1002
         """Set up the main window"""
         super(MydownloaderWindow, self).finish_initializing(builder)
@@ -35,6 +36,10 @@ class MydownloaderWindow(Window):
         self.PreferencesDialog = PreferencesMydownloaderDialog
         self.set_position(0)
         gobject.idle_add(utility.loadFromDb,self)
+        try: 
+            pass#os.unlink('/tmp/test')
+        except:
+            pass
         # Code for other initialization actions should be added here.
 
     def on_mnu_new_activate(self,widget,data=None):
@@ -64,34 +69,46 @@ class MydownloaderWindow(Window):
                 
                 listStore,treeiter= treeview.get_selection().get_selected()
                 if treeiter is not None:
-                    print listStore.get_value(treeiter,0)
+                   # print listStore.get_value(treeiter,0)
                     self.ui.mnu_popup.popup(None,None,None,None,event.button,time)
 
             return True
 
     def on_Start_clicked(self,widget,data=None):
         listStore,treeiter = self.ui.treeview1.get_selection().get_selected()
+        
         if treeiter is not None:
-            #read id and url
+            #read id
+        
             download_id = listStore.get_value(treeiter,0)
-            download_url = listStore.get_value(treeiter,2)
-            print download_url
-            # gets a non existant name for the file
-            filename = utility.findFileName(listStore.get_value(treeiter,1))
-            print filename
-
-            # updates location value in database
-            utility.updateLoc(download_id,filename) 
+            if download_id not in self.downloading:
+                dItem = utility.DownloadItem(download_id)
+                print dItem
+                fnull = open(os.devnull,'w')
+                handler = sp.Popen(['axel','-n 1','-a',dItem.url,'--output=/tmp/'+dItem.download_name],stdout=fnull)
+                self.handles[download_id]=handler
+                GLib.timeout_add(500,self.calc,dItem,treeiter)
+                
+                self.downloading.append(download_id)
+    def on_Stop_clicked(self,widget,data=None):
+        listStore,treeiter = self.ui.treeview1.get_selection().get_selected()
+        if treeiter is not None:  
+            download_id = listStore.get_value(treeiter,0)
+            if download_id in self.downloading:    
+                h = self.handles[download_id]
+                if h is not None:
+                    h.terminate()
+                    self.downloading.remove(download_id)
+                    
+                    
                         
-            #start download thread
-            apt = sp.Popen(['axel','-n 1','-a',download_url,'--output=/tmp/'+filename],stdout = sp.PIPE)
-            #print apt.stdout.read()
-            self.downloading.append(download_id)
+    def calc(self,dItem,treeiter):
+        per=dItem.calcPercent()
+        store=self.builder.get_object('liststore1')
+        store.set_value(treeiter,4,str(int(per))+"%")
+        if per<=100:
+            return True
+        else:
+            return False
 
-            #check filesize to get progress
-            #thread.start_new_thread(self.pulse,(download_id,))
-
-    def pulse(d_id):
-        sleep(5)
-        print calcPer(d_id)
         

@@ -1,0 +1,50 @@
+import sqlite3
+#import DownloadItem
+class DownloadItem:
+    did=0
+    ori_file_name=""
+    download_name=""
+    url = ""
+    size=0
+    progress=0
+    
+    def __init__(self):
+    
+               
+    def load_item(did):
+        con = None
+        try:
+		    con=db.connect('dlList.db')
+		    cursor = con.cursor()
+		    sql = "SELECT * FROM downloads WHERE id="+str(did)
+		    cursor.execute(sql)
+		    row = cursor.fetchone()
+		    self.did = did
+		    self.ori_file_name = row[1]
+		    self.download_name = row[4]
+		    self.url = row[2]
+		    self.url = row[3]
+		    self.progress = calcPercent()
+		    return
+        except IOError as e:		
+		    print e
+    def calcPercent():
+        download_size=0
+        per = 0
+        if os.path.exists(TMP_DIR+self.download_name):
+            download_size = os.path.getsize(TMP_DIR+self.download_name)
+        if self.size !=0:
+            per = float(download_size) / self.size * 100
+        return per
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

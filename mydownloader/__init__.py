@@ -9,8 +9,8 @@ import gettext
 from gettext import gettext as _
 gettext.textdomain('mydownloader')
 
-from gi.repository import Gtk # pylint: disable=E0611
-
+from gi.repository import Gtk,Gdk # pylint: disable=E0611
+Gdk.threads_init()
 from mydownloader import MydownloaderWindow
 
 from mydownloader_lib import set_up_logging, get_version
@@ -30,7 +30,10 @@ def main():
     parse_options()
 
     # Run the application.
+    
 
     window = MydownloaderWindow.MydownloaderWindow()
+    Gdk.threads_enter()
     Gtk.main()    
+    Gdk.threads_leave()
     window.show()

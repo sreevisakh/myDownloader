@@ -1,0 +1,589 @@
+=== modified file 'data/ui/AddnewdownloadDialog.ui'
+--- data/ui/AddnewdownloadDialog.ui	2013-03-23 17:11:33 +0000
++++ data/ui/AddnewdownloadDialog.ui	2013-03-25 17:30:30 +0000
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <interface>
++  <!-- interface-requires gtk+ 3.0 -->
+   <!-- interface-requires addnewdownload_dialog 1.0 -->
+-  <!-- interface-requires gtk+ 3.0 -->
+   <object class="AddnewdownloadDialog" id="addnewdownload_dialog">
+     <property name="can_focus">False</property>
+     <property name="border_width">5</property>
+@@ -89,6 +89,7 @@
+                 <property name="visible">True</property>
+                 <property name="can_focus">True</property>
+                 <property name="invisible_char">●</property>
++                <property name="text" translatable="yes">http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi</property>
+               </object>
+               <packing>
+                 <property name="expand">False</property>
+
+=== modified file 'data/ui/MydownloaderWindow.ui'
+--- data/ui/MydownloaderWindow.ui	2013-03-23 17:11:33 +0000
++++ data/ui/MydownloaderWindow.ui	2013-03-26 07:55:26 +0000
+@@ -16,8 +16,63 @@
+       <column type="gchararray"/>
+       <!-- column-name Fileurl -->
+       <column type="gchararray"/>
++      <!-- column-name Size -->
++      <column type="gchararray"/>
++      <!-- column-name Status -->
++      <column type="gchararray"/>
++      <!-- column-name Location -->
++      <column type="gchararray"/>
+     </columns>
+   </object>
++  <object class="GtkMenu" id="mnu_popup">
++    <property name="visible">True</property>
++    <property name="can_focus">False</property>
++    <child>
++      <object class="GtkMenuItem" id="mun_start">
++        <property name="use_action_appearance">False</property>
++        <property name="visible">True</property>
++        <property name="can_focus">False</property>
++        <property name="label" translatable="yes">Start/Stop</property>
++        <property name="use_underline">True</property>
++      </object>
++    </child>
++    <child>
++      <object class="GtkMenuItem" id="mnu_remove">
++        <property name="use_action_appearance">False</property>
++        <property name="visible">True</property>
++        <property name="can_focus">False</property>
++        <property name="label" translatable="yes">Remove</property>
++        <property name="use_underline">True</property>
++      </object>
++    </child>
++    <child>
++      <object class="GtkMenuItem" id="mnu_copyurl">
++        <property name="use_action_appearance">False</property>
++        <property name="visible">True</property>
++        <property name="can_focus">False</property>
++        <property name="label" translatable="yes">Copy Url</property>
++        <property name="use_underline">True</property>
++      </object>
++    </child>
++    <child>
++      <object class="GtkMenuItem" id="mnu_openloc">
++        <property name="use_action_appearance">False</property>
++        <property name="visible">True</property>
++        <property name="can_focus">False</property>
++        <property name="label" translatable="yes">Open Location</property>
++        <property name="use_underline">True</property>
++      </object>
++    </child>
++    <child>
++      <object class="GtkMenuItem" id="mnu_prop">
++        <property name="use_action_appearance">False</property>
++        <property name="visible">True</property>
++        <property name="can_focus">False</property>
++        <property name="label" translatable="yes">Properties</property>
++        <property name="use_underline">True</property>
++      </object>
++    </child>
++  </object>
+   <object class="MydownloaderWindow" id="mydownloader_window">
+     <property name="width_request">700</property>
+     <property name="height_request">400</property>
+@@ -295,17 +350,23 @@
+           <object class="GtkTreeView" id="treeview1">
+             <property name="visible">True</property>
+             <property name="can_focus">True</property>
+-            <property name="hexpand">True</property>
+             <property name="vscroll_policy">natural</property>
+             <property name="model">liststore1</property>
++            <property name="search_column">1</property>
+             <property name="enable_grid_lines">both</property>
++            <signal name="button-press-event" handler="on_treeview1_button_press_event" swapped="no"/>
+             <child internal-child="selection">
+-              <object class="GtkTreeSelection" id="treeview-selection1"/>
++              <object class="GtkTreeSelection" id="treeview-selection1">
++                <signal name="changed" handler="on_treeview1_selection_changed" swapped="no"/>
++              </object>
+             </child>
+             <child>
+               <object class="GtkTreeViewColumn" id="treeviewcolumn1">
+                 <property name="resizable">True</property>
++                <property name="min_width">1</property>
++                <property name="max_width">3</property>
+                 <property name="title" translatable="yes">No</property>
++                <property name="expand">True</property>
+                 <property name="clickable">True</property>
+                 <child>
+                   <object class="GtkCellRendererText" id="cellrenderertext1"/>
+@@ -343,6 +404,30 @@
+                 </child>
+               </object>
+             </child>
++            <child>
++              <object class="GtkTreeViewColumn" id="treeviewcolumn4">
++                <property name="title" translatable="yes">Size</property>
++                <property name="expand">True</property>
++                <child>
++                  <object class="GtkCellRendererText" id="cellrenderertext4"/>
++                  <attributes>
++                    <attribute name="text">3</attribute>
++                  </attributes>
++                </child>
++              </object>
++            </child>
++            <child>
++              <object class="GtkTreeViewColumn" id="treeviewcolumn5">
++                <property name="title" translatable="yes">Status</property>
++                <property name="expand">True</property>
++                <child>
++                  <object class="GtkCellRendererText" id="cellrenderertext5"/>
++                  <attributes>
++                    <attribute name="text">4</attribute>
++                  </attributes>
++                </child>
++              </object>
++            </child>
+           </object>
+           <packing>
+             <property name="expand">True</property>
+
+=== modified file 'mydownloader/MydownloaderWindow.py'
+--- mydownloader/MydownloaderWindow.py	2013-03-23 17:11:33 +0000
++++ mydownloader/MydownloaderWindow.py	2013-03-26 17:57:52 +0000
+@@ -4,13 +4,19 @@
+ ### END LICENSE
+ 
+ import gettext
++import os
++import time
+ from gettext import gettext as _
+ gettext.textdomain('mydownloader')
+-
++import thread
+ from gi.repository import Gtk # pylint: disable=E0611
+ import logging
+ logger = logging.getLogger('mydownloader')
+ import utility
++import pdb
++import thread
++import gobject
++import subprocess as sp
+ from mydownloader_lib import Window
+ from mydownloader.AboutMydownloaderDialog import AboutMydownloaderDialog
+ from mydownloader.PreferencesMydownloaderDialog import PreferencesMydownloaderDialog
+@@ -19,6 +25,8 @@
+ class MydownloaderWindow(Window):
+     __gtype_name__ = "MydownloaderWindow"
+     priority = 0
++    handles={}
++    downloading=[]
+     def finish_initializing(self, builder): # pylint: disable=E1002
+         """Set up the main window"""
+         super(MydownloaderWindow, self).finish_initializing(builder)
+@@ -26,31 +34,64 @@
+         self.AboutDialog = AboutMydownloaderDialog
+         self.PreferencesDialog = PreferencesMydownloaderDialog
+         self.set_position(0)
+-
++        gobject.idle_add(utility.loadFromDb,self)
+         # Code for other initialization actions should be added here.
++
+     def on_mnu_new_activate(self,widget,data=None):
+         adder = AddnewdownloadDialog()
+         result = adder.run()
+         url = adder.get_url
+         adder.destroy()
+-        if not utility.validateUrl(url):
+-            msg = Gtk.MessageDialog(parent=self, flags=0, type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK, message_format="Can't Process a malformed url")   
+-            msg.run()
+-            msg.destroy()
+-        else:
+-            #check dialogbox result
+-            if result!=Gtk.ResponseType.OK:
+-                return
+-
+-            details = utility.getUrlDetails(url)            
+-            if details['error']:
+-                msg = Gtk.MessageDialog(parent=self, flags=0, type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, message_format=details['error'])   
+-                msg.run()
+-                msg.destroy()
+-            #add list of files to treeview
+-            else:
+-                urllist = self.builder.get_object('liststore1')
+-                self.priority +=1
+-                urllist.append([self.priority,details['filename'],details['url']])
+-
+-    
++        if result==Gtk.ResponseType.OK:
++            gobject.idle_add(utility.addUrl,self,url)
++
++   # def on_treeview1_selection_changed(window,selection):
++       # print "Selected"
++       # listStoreObject,treepath =  selection.get_selected_rows()
++        #print listStoreObject[0][1]
++    def on_treeview1_button_press_event(self, treeview, event):
++        if event.button == 3:   #right click
++            x = int(event.x)
++            y = int(event.y)
++            time = event.time
++            treeview.grab_focus()
++            pthinfo = treeview.get_path_at_pos(x, y)
++            if pthinfo is not None:
++                
++                path, col, cellx, celly = pthinfo
++                treeview.grab_focus()
++                treeview.set_cursor( path, col, 0)
++                
++                listStore,treeiter= treeview.get_selection().get_selected()
++                if treeiter is not None:
++                    print listStore.get_value(treeiter,0)
++                    self.ui.mnu_popup.popup(None,None,None,None,event.button,time)
++
++            return True
++
++    def on_Start_clicked(self,widget,data=None):
++        listStore,treeiter = self.ui.treeview1.get_selection().get_selected()
++        if treeiter is not None:
++            #read id and url
++            download_id = listStore.get_value(treeiter,0)
++            download_url = listStore.get_value(treeiter,2)
++            print download_url
++            # gets a non existant name for the file
++            filename = utility.findFileName(listStore.get_value(treeiter,1))
++            print filename
++
++            # updates location value in database
++            utility.updateLoc(download_id,filename) 
++                        
++            #start download thread
++            apt = sp.Popen(['axel','-n 1','-a',download_url,'--output=/tmp/'+filename],stdout = sp.PIPE)
++            #print apt.stdout.read()
++            self.downloading.append(download_id)
++
++            #check filesize to get progress
++            #thread.start_new_thread(self.pulse,(download_id,))
++
++    def pulse(d_id):
++        sleep(5)
++        print calcPer(d_id)
++        
+
+=== modified file 'mydownloader/__init__.py'
+--- mydownloader/__init__.py	2013-03-22 15:09:40 +0000
++++ mydownloader/__init__.py	2013-03-25 17:14:18 +0000
+@@ -29,7 +29,8 @@
+     'constructor for your class instances'
+     parse_options()
+ 
+-    # Run the application.    
++    # Run the application.
++
+     window = MydownloaderWindow.MydownloaderWindow()
++    Gtk.main()    
+     window.show()
+-    Gtk.main()
+
+=== modified file 'mydownloader/utility.py'
+--- mydownloader/utility.py	2013-03-23 17:11:33 +0000
++++ mydownloader/utility.py	2013-03-30 03:06:06 +0000
+@@ -1,52 +1,274 @@
+ import re
+ import urllib2
+ import os
++from gi.repository import Gtk
++import sqlite3 as db
++import traceback
++import threading
++import time
++	#bad
++	#global url1 = "http://google.com"
++	#global url2 = "ht"
++	#global url3 = "http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi"
++	#global url4 = "http://www.python.org/ftp/python/2.7.3/"	
++	#global url5 = "support.google.com/webmasters/bin/answer.py?hl=en&answer=1408986"
++	#global url6 = "support.google.com/webmasters/bin/answer.py"
++
++DOWNLOAD_DIR="/home/sv/Downloads/"
++TEMP_DIR="/tmp/"
+ 
+ 
+ def validateUrl(url):
+ 	""" Helps to validate urls"""
++	try:
++		regex = re.compile(r'^(?:http|ftp)s?://' # http:// or https://
++		r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
++		r'localhost|' #localhost...
++		r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
++		r'(?::\d+)?' # optional port
++		r'(?:/?|[/?]\S+)$', re.IGNORECASE)
++		match = regex.match(url)
++		if match:
++			return 1
++		else:
++			return 0
++	except IOError:
++		return 0
+ 
+-	regex = re.compile(r'^(?:http|ftp)s?://' # http:// or https://
+-    r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
+-    r'localhost|' #localhost...
+-    r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+-    r'(?::\d+)?' # optional port
+-    r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+-	match = regex.match(url)
+-	if match:
+-		return 1
+-	else:
+-		return 0
+ def human_readable(num):
+-    for x in ['bytes','KB','MB','GB','TB']:
+-        if num < 1024.0:
+-            return "%3.1f %s" % (num, x)
+-        num /= 1024.0
+-	
++	num = int(num)
++	for x in ['bytes','KB','MB','GB','TB']:
++		if num < 1024.0:
++			return "%3.1f %s" % (num, x)
++		num /= 1024.0
++
+ 
+ def getUrlDetails(url):
+-	"""gets url details"""
++	"""gets url details result in details"""
+ 	try:
+-		#stores url details
+ 		details={}
+-		
+ 		#getting and parsing and storing
+ 		urlFile = urllib2.urlopen(url)
+ 		urlDetails = str(urlFile.info())
+ 		details = dict(map(str.strip, line.split(':', 1)) for line in urlDetails.splitlines())
+ 		details['error']=""
+ 		details['url']=urlFile.geturl()
+-
++		if 'Content-Length' in  details:
++			details['Content-Length'] = str((details['Content-Length']))
++		else:
++			details['Content-Length'] ="Unavailable"
+ 		#checking filetype
+ 		if 'text/html' in details['Content-Type'] and os.path.basename(details['url'])=="": #if no filename
+ 			details['url']=urlFile.geturl()+"index.html"
+-
+ 		details['filename'] = str.split(os.path.basename(details['url']),'?',1)[0]
+-		details['error']=""
+-		return details
+-	except urllib2.HTTPError as e:
+-		details['error'] = e
+-		print e
+-		return details
+-	
++		
++		return details
++	except IOError as e:
++		return e
++
++
++def status(window,msg):
++	window.ui.label2.set_text(msg)
++
++def addUrl(window,url):
++	"""Function used to add url to download list"""
++	#try:
++	
++	#check already exists
++	result = checkUrlExists(window,url)
++	if result==1:
++		handleError(window,"Duplicate Download",Gtk.MessageType.WARNING) # NEED UPDATE
++		return 0
++	status(window,'Validating')
++	result = validateUrl(url)
++	if result == 0:
++		handleError(window,"Can't add malformed url",Gtk.MessageType.ERROR)
++	else:
++		status(window,'Getting URL details')
++		result = getUrlDetails(url)
++		if type(result) ==dict:
++			status(window,'Adding to List')
++			if addToDb(window,result):
++				listObject = window.builder.get_object('liststore1') #dependant
++				listObject.append([1,result['filename'],result['url'],str(human_readable(result['Content-Length'])),"0%",""])
++			status(window,'Idle')
++			return 0
++		else:
++			handleError(window,result,Gtk.MessageType.WARNING)
++			return 0		
++	#except IOError as e:
++	#	handleError(window,e,Gtk.MessageType.ERROR)
++	#	return 0
++
++def findFileName(filename):
++	"""Find non exist filename to save download content"""
++	num = 0		
++	while os.path.exists(TEMP_DIR+filename) or os.path.exists(DOWNLOAD_DIR+filename):
++		name,ext = os.path.splitext(filename)
++		name = name+"("+str(num)+")"
++		filename = name+ext
++	return filename
++
++def calcPer(file_id):
++	try:
++		con=db.connect('dlList.db')
++		cursor = con.cursor()
++		sql = "SELECT loc,size FROM downloads WHERE id="+str(file_id)
++		cursor.execute(sql)
++		row = cursor.fetchone()
++		totalSize = row[1]
++		fileloc= row[0]
++		con.close()
++		dlSize = os.path.getsize(TEMP_DIR+fileloc)
++		per = long(dlSize)/long(totalSize) *100
++		return str(per)+"%"
++	except IOError as e:
++		print e
++	
++
++#######################################
++# DB RELATED CODES
++#######################################
++
++def addToDb(window,d):
++	"""Add download urls to database"""
++	con = None
++	try:
++		con = db.connect('dlList.db')
++		cursor = con.cursor()
++		sql = "INSERT INTO downloads (filename,fileurl,size,loc) values('"+d['filename']+"','"+d['url']+"','"+d['Content-Length']+"','')"
++		con.execute(sql)
++		con.commit()
++		return 1
++	except IOError as e:		
++		handleError(window,e,Gtk.MessageType.ERROR)
++		return 0
++		
++def loadFromDb(window):
++	"""Load download list from db"""
++	con = None
++	try:
++		con=db.connect('dlList.db')
++		cursor = con.cursor()
++		sql = "SELECT * FROM downloads"
++		cursor.execute(sql)
++		rows = cursor.fetchall()
++		listObject = window.builder.get_object('liststore1') #dependant
++		for result in rows:
++		
++			listObject.append([result[0],result[1],result[2],result[3],calcPer(result[0]),result[4]])
++		return
++	except IOError as e:		
++		handleError(window,e,Gtk.MessageType.ERROR)
++
++def checkUrlExists(window,url):
++	"""Checks and return if url already in downloadlist"""
++	con = None
++	try:
++		con=db.connect('dlList.db')
++		cursor = con.cursor()
++		sql = "SELECT * FROM downloads WHERE fileurl='"+url+"'"
++		cursor.execute(sql)
++		rows = cursor.fetchall()
++		if len(rows)>0:
++			return 1
++		else:
++			return 0
++	except IOError as e:		
++		handleError(window,e,Gtk.MessageType.ERROR)
++def updateLoc(a,b): #a=Id,b=filename
++	"""Update download location of file"""
++	con = None
++	try:
++		con=db.connect('dlList.db')
++		cursor = con.cursor()
++		sql = "UPDATE downloads SET loc='"+b+"' WHERE id="+str(a)
++		cursor.execute(sql)
++		con.commit()
++	except IOError as e:		
++		print e
++def emptyDb():
++	"""Deletes all values in Databse"""
++	con = None
++	try:
++		con=db.connect('dlList.db')
++		cursor = con.cursor()
++		sql = "DELETE FROM downloads"
++		cursor.execute(sql)
++	except IOError as e:		
++		#handleError(window,e,Gtk.MessageType.ERROR)
++###################################################
++###Threading Section###############################
++###################################################
++class DownloadThread(threading.Thread):
++    def __init__(self,url,filename):
++        threading.Thread.__init__(self)
++        self.url=url
++        self.filename = filename
++        self.completed = False	
++    def run(self):
++        os.system('axel -aqn 1 '+self.url+' --output=/tmp/'+self.filename)
++            
++class ProgressThread(threading.Thread):
++    def __init__(self,originalsize,filename,window):
++            threading.Thread.__init__(self)
++            self.size = originalsize
++            self.filename = filename
++            self.progress = 0
++            self.completed = False
++            self.list = window.builder.get_object('liststore1')
++    def run(self):
++        nowSize=0
++        
++        while not self.completed:
++        
++            if os.path.exists('/tmp/'+self.filename):
++
++                nowSize = long(os.path.getsize('/tmp/'+self.filename))
++
++            if nowSize==self.size:
++                self.completed=True
++            else:
++                self.progress = int(float(nowSize)/self.size*100)
++                
++            time.sleep(0.5)
++
++thread1 = DownloadThread('http://localhost/test','test')
++thread1.start() # This actually causes the thread to run
++thread2 = ProgressThread(753126925,'test')
++thread2.start()
++
++
++##############################################
++# Error Handling Codes
++##############################################
++
++
++def handleError(window,e,t):
++	"""Handles error Messages via messagebox"""
++	if type(e)==IOError:
++		traceback.print_last()
++	msg = Gtk.MessageDialog(parent=window, flags=0, type=t, buttons=Gtk.ButtonsType.OK, message_format=str(e))   
++	msg.run()
++	msg.destroy() 
++	
++
++#Tests
++import unittest
++
++def unit():
++	#testing validateurl
++	d = {'filename':'TestFilename1','fileurl':'TestUrl1','Content-Length':'100 MB'}
++	addToDb(d)
++		
++
++#emptyDb()
++
++
++#import mydownloader.utility as u
++#u.updateLoc(0,"hello.txt")
++
++
++
++
+ 	
+
